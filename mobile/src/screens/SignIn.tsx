@@ -19,6 +19,8 @@ import LogoSvg from "@assets/logo.svg";
 import { useAuth } from "@hooks/useAuth";
 import { useNavigation } from "@react-navigation/native";
 import { useState } from "react";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { Platform } from "react-native";
 
 type FormData = {
   email: string;
@@ -67,13 +69,18 @@ export function SignIn() {
       contentContainerStyle={{ flexGrow: 1 }}
       showsVerticalScrollIndicator={false}
     >
-      <VStack flex={1} px={10} pb={16}>
+      <VStack flex={1} pb={16}>
         <Image
           source={BackgroundImage}
           defaultSource={BackgroundImage}
           alt="Mosquito da Dengue"
-          resizeMode="contain"
-          position="absolute"
+          resizeMode="cover"
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+          }}
         />
         <Center my={24} mb={4}>
           <HStack alignItems={"center"}>
@@ -86,55 +93,61 @@ export function SignIn() {
             Unidos contra a dengue
           </Text>
         </Center>
-        <Center>
-          <Heading color="gray.100" fontSize="xl" fontFamily="heading" mb={6}>
-            Acesse sua conta
-          </Heading>
-          <Controller
-            control={control}
-            name="email"
-            rules={{ required: "Informe o E-mail" }}
-            render={({ field: { onChange } }) => (
-              <Input
-                placeholder="E-mail"
-                keyboardType="email-address"
-                autoCapitalize="none"
-                onChangeText={onChange}
-                errorMessage={errors.email?.message}
-              />
-            )}
-          ></Controller>
+        <KeyboardAwareScrollView
+          enableAutomaticScroll
+          keyboardOpeningTime={0}
+          extraHeight={Platform.select({})}
+        >
+          <Center px={10}>
+            <Heading color="gray.100" fontSize="xl" fontFamily="heading" mb={6}>
+              Acesse sua conta
+            </Heading>
+            <Controller
+              control={control}
+              name="email"
+              rules={{ required: "Informe o E-mail" }}
+              render={({ field: { onChange } }) => (
+                <Input
+                  placeholder="E-mail"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  onChangeText={onChange}
+                  errorMessage={errors.email?.message}
+                />
+              )}
+            ></Controller>
 
-          <Controller
-            control={control}
-            name="password"
-            rules={{ required: "Informe a senha" }}
-            render={({ field: { onChange } }) => (
-              <Input
-                placeholder="Senha"
-                secureTextEntry
-                onChangeText={onChange}
-                errorMessage={errors.password?.message}
-              />
-            )}
-          ></Controller>
+            <Controller
+              control={control}
+              name="password"
+              rules={{ required: "Informe a senha" }}
+              render={({ field: { onChange } }) => (
+                <Input
+                  placeholder="Senha"
+                  secureTextEntry
+                  onChangeText={onChange}
+                  errorMessage={errors.password?.message}
+                />
+              )}
+            ></Controller>
 
-          <Button
-            title="Acessar"
-            onPress={handleSubmit(handleSignIn)}
-            isLoading={loading}
-          />
-        </Center>
-        <Center mt={24}>
-          <Text color="gray.100" fontSize="sm" mb={3} fontFamily="body">
-            Ainda não tem acesso?
-          </Text>
-          <Button
-            onPress={handleNewAccount}
-            title="Criar conta"
-            variant="outline"
-          />
-        </Center>
+            <Button
+              title="Acessar"
+              onPress={handleSubmit(handleSignIn)}
+              isLoading={loading}
+            />
+          </Center>
+          <Center px={10} mt={24}>
+            <Text color="gray.100" fontSize="sm" mb={3} fontFamily="body">
+              Ainda não tem acesso?
+            </Text>
+            <Button
+              onPress={handleNewAccount}
+              title="Criar conta"
+              variant="outline"
+            />
+          </Center>
+        </KeyboardAwareScrollView>
       </VStack>
     </ScrollView>
   );

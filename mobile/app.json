@@ -15,7 +15,8 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.williamforneck.dengueapp"
     },
     "android": {
       "adaptiveIcon": {
@@ -36,12 +37,16 @@
         {
           "photosPermission": "The app accesses your photos to let you share them with your friends."
         }
-      ]
+      ],
+      "expo-font"
     ],
     "extra": {
       "eas": {
         "projectId": "c9eb41ef-f461-4725-86f7-46673cb6781a"
       }
     }
+  },
+  "androidStatusBar": {
+    "backgroundColor": "#000000"
   }
 }

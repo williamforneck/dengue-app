@@ -18,7 +18,7 @@ import { AppNavigatorRoutesProps } from "@routes/app.routes";
 import { Button } from "@components/Button";
 import { Feather } from "@expo/vector-icons";
 import { Loading } from "@components/Loading";
-import { TouchableOpacity } from "react-native";
+import { Platform, TouchableOpacity } from "react-native";
 import { api } from "@services/api";
 import { Controller, useForm } from "react-hook-form";
 import * as yup from "yup";
@@ -28,6 +28,7 @@ import * as FileSystem from "expo-file-system";
 import * as ImagePicker from "expo-image-picker";
 import { useAuth } from "@hooks/useAuth";
 import defaultUserPhotoImg from "@assets/userPhotoDefault.png";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 type FormDataProps = {
   descricao: string;
@@ -206,156 +207,163 @@ export function NewFocus() {
               </Heading>
             </HStack>
           </VStack>
-          <ScrollView>
-            <VStack p={8}>
-              <Center>
-                {photoIsLoading ? (
-                  <Skeleton
-                    w={PHOTO_SIZE}
-                    h={PHOTO_SIZE}
-                    startColor="gray.500"
-                    endColor="gray.400"
-                  />
-                ) : (
-                  <Image
-                    w={PHOTO_SIZE}
-                    h={PHOTO_SIZE}
-                    borderWidth={2}
-                    borderColor="gray.400"
-                    source={
-                      photo.length
-                        ? {
-                            uri: `${api.defaults.baseURL}/avatar/${photo}`,
-                          }
-                        : defaultUserPhotoImg
-                    }
-                    alt="Foto do local"
-                  />
-                )}
-                <TouchableOpacity onPress={handleUserPhotoSelect}>
-                  <Text
-                    color="green.500"
-                    fontFamily="heading"
-                    fontSize="md"
-                    mt={2}
-                    mb={8}
-                  >
-                    Enviar foto
-                  </Text>
-                </TouchableOpacity>
+          <KeyboardAwareScrollView
+            enableAutomaticScroll
+            keyboardOpeningTime={0}
+            viewIsInsideTabBar
+            extraHeight={Platform.select({ ios: 180 })}
+          >
+            <ScrollView>
+              <VStack p={8}>
+                <Center>
+                  {photoIsLoading ? (
+                    <Skeleton
+                      w={PHOTO_SIZE}
+                      h={PHOTO_SIZE}
+                      startColor="gray.500"
+                      endColor="gray.400"
+                    />
+                  ) : (
+                    <Image
+                      w={PHOTO_SIZE}
+                      h={PHOTO_SIZE}
+                      borderWidth={2}
+                      borderColor="gray.400"
+                      source={
+                        photo.length
+                          ? {
+                              uri: `${api.defaults.baseURL}/avatar/${photo}`,
+                            }
+                          : defaultUserPhotoImg
+                      }
+                      alt="Foto do local"
+                    />
+                  )}
+                  <TouchableOpacity onPress={handleUserPhotoSelect}>
+                    <Text
+                      color="green.500"
+                      fontFamily="heading"
+                      fontSize="md"
+                      mt={2}
+                      mb={8}
+                    >
+                      Enviar foto
+                    </Text>
+                  </TouchableOpacity>
 
-                <Controller
-                  control={control}
-                  name="descricao"
-                  render={({ field: { onChange, value } }) => (
-                    <Input
-                      onChangeText={onChange}
-                      value={value}
-                      placeholder="Descrição"
-                      errorMessage={errors.descricao?.message}
-                    />
-                  )}
-                />
-                <Heading
-                  color="gray.100"
-                  fontSize="xl"
-                  fontFamily="heading"
-                  mb={6}
-                >
-                  Endereço:
-                </Heading>
-                <Controller
-                  control={control}
-                  name="cep"
-                  render={({ field: { onChange, value } }) => (
-                    <Input
-                      onChangeText={onChange}
-                      value={value}
-                      placeholder="CEP"
-                      errorMessage={errors.cep?.message}
-                    />
-                  )}
-                />
-                <Controller
-                  control={control}
-                  name="cidade"
-                  render={({ field: { onChange, value } }) => (
-                    <Input
-                      onChangeText={onChange}
-                      value={value}
-                      placeholder="Cidade"
-                      errorMessage={errors.cidade?.message}
-                    />
-                  )}
-                />
-                <Controller
-                  control={control}
-                  name="uf"
-                  render={({ field: { onChange, value } }) => (
-                    <Input
-                      onChangeText={onChange}
-                      value={value}
-                      placeholder="UF"
-                      errorMessage={errors.uf?.message}
-                    />
-                  )}
-                />
-                <Controller
-                  control={control}
-                  name="bairro"
-                  render={({ field: { onChange, value } }) => (
-                    <Input
-                      onChangeText={onChange}
-                      value={value}
-                      placeholder="Bairro"
-                      errorMessage={errors.bairro?.message}
-                    />
-                  )}
-                />
-                <Controller
-                  control={control}
-                  name="logradouro"
-                  render={({ field: { onChange, value } }) => (
-                    <Input
-                      onChangeText={onChange}
-                      value={value}
-                      placeholder="Logradouro"
-                      errorMessage={errors.logradouro?.message}
-                    />
-                  )}
-                />
-                <Controller
-                  control={control}
-                  name="numero"
-                  render={({ field: { onChange, value } }) => (
-                    <Input
-                      onChangeText={onChange}
-                      value={value}
-                      placeholder="Número"
-                      errorMessage={errors.numero?.message}
-                    />
-                  )}
-                />
-                <Controller
-                  control={control}
-                  name="complemento"
-                  render={({ field: { onChange, value } }) => (
-                    <Input
-                      onChangeText={onChange}
-                      value={value}
-                      placeholder="Complemento"
-                      errorMessage={errors.complemento?.message}
-                    />
-                  )}
-                />
-                <Button
-                  title="Cadastrar"
-                  isLoading={isLoading}
-                  onPress={handleSubmit(handleCreateFocus)}
-                />
-              </Center>
-            </VStack>
-          </ScrollView>
+                  <Controller
+                    control={control}
+                    name="descricao"
+                    render={({ field: { onChange, value } }) => (
+                      <Input
+                        onChangeText={onChange}
+                        value={value}
+                        placeholder="Descrição"
+                        errorMessage={errors.descricao?.message}
+                      />
+                    )}
+                  />
+                  <Heading
+                    color="gray.100"
+                    fontSize="xl"
+                    fontFamily="heading"
+                    mb={6}
+                  >
+                    Endereço:
+                  </Heading>
+                  <Controller
+                    control={control}
+                    name="cep"
+                    render={({ field: { onChange, value } }) => (
+                      <Input
+                        onChangeText={onChange}
+                        value={value}
+                        placeholder="CEP"
+                        errorMessage={errors.cep?.message}
+                      />
+                    )}
+                  />
+                  <Controller
+                    control={control}
+                    name="cidade"
+                    render={({ field: { onChange, value } }) => (
+                      <Input
+                        onChangeText={onChange}
+                        value={value}
+                        placeholder="Cidade"
+                        errorMessage={errors.cidade?.message}
+                      />
+                    )}
+                  />
+                  <Controller
+                    control={control}
+                    name="uf"
+                    render={({ field: { onChange, value } }) => (
+                      <Input
+                        onChangeText={onChange}
+                        value={value}
+                        placeholder="UF"
+                        errorMessage={errors.uf?.message}
+                      />
+                    )}
+                  />
+                  <Controller
+                    control={control}
+                    name="bairro"
+                    render={({ field: { onChange, value } }) => (
+                      <Input
+                        onChangeText={onChange}
+                        value={value}
+                        placeholder="Bairro"
+                        errorMessage={errors.bairro?.message}
+                      />
+                    )}
+                  />
+                  <Controller
+                    control={control}
+                    name="logradouro"
+                    render={({ field: { onChange, value } }) => (
+                      <Input
+                        onChangeText={onChange}
+                        value={value}
+                        placeholder="Logradouro"
+                        errorMessage={errors.logradouro?.message}
+                      />
+                    )}
+                  />
+                  <Controller
+                    control={control}
+                    name="numero"
+                    render={({ field: { onChange, value } }) => (
+                      <Input
+                        onChangeText={onChange}
+                        value={value}
+                        placeholder="Número"
+                        errorMessage={errors.numero?.message}
+                      />
+                    )}
+                  />
+                  <Controller
+                    control={control}
+                    name="complemento"
+                    render={({ field: { onChange, value } }) => (
+                      <Input
+                        onChangeText={onChange}
+                        value={value}
+                        placeholder="Complemento"
+                        errorMessage={errors.complemento?.message}
+                      />
+                    )}
+                  />
+                  <Button
+                    title="Cadastrar"
+                    isLoading={isLoading}
+                    onPress={handleSubmit(handleCreateFocus)}
+                  />
+                </Center>
+              </VStack>
+            </ScrollView>
+          </KeyboardAwareScrollView>
         </>
       )}
     </VStack>
