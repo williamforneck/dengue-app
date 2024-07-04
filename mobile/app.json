@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "gym",
-    "slug": "gym",
+    "name": "dengue-app",
+    "slug": "dengue-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -21,7 +21,11 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ],
+      "package": "com.williamforneck.dengueapp"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -33,6 +37,11 @@
           "photosPermission": "The app accesses your photos to let you share them with your friends."
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "c9eb41ef-f461-4725-86f7-46673cb6781a"
+      }
+    }
   }
 }
