@@ -1,5 +1,5 @@
 {
-  "name": "api",
+  "name": "dengue-api",
   "version": "1.0.0",
   "description": "API desenvolvida para ser utilizada no módulo de consumo de API na trilha de React Native do Ignite.",
   "main": "index.js",
