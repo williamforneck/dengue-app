@@ -1,11 +1,11 @@
-import { HStack, Heading, Icon, Text, VStack } from "native-base";
+import { HStack, Icon, Text, VStack } from "native-base";
 
+import defaultUserPhotoImg from "@assets/userPhotoDefault.png";
 import { MaterialIcons } from "@expo/vector-icons";
+import { useAuth } from "@hooks/useAuth";
+import { api } from "@services/api";
 import { TouchableOpacity } from "react-native";
 import { UserPhoto } from "./UserPhoto";
-import { api } from "@services/api";
-import defaultUserPhotoImg from "@assets/userPhotoDefault.png";
-import { useAuth } from "@hooks/useAuth";
 
 export function HomeHeader() {
   const { user, signOut } = useAuth();
@@ -23,7 +23,7 @@ export function HomeHeader() {
         mr={4}
       />
       <VStack flex={1}>
-        <Text fontSize="md" color="gray.100">
+        <Text numberOfLines={1} fontSize="md" color="gray.100">
           Olá,{" "}
           <Text fontSize="md" fontFamily="heading" color="gray.100">
             {user.name}

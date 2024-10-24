@@ -1,28 +1,20 @@
-export type FocusResponseDTO = {
-  title: string;
-  data: FocusDto[];
-};
+import { LatLng } from "react-native-maps";
 
 export type FocusDto = {
-  id: number;
-  created_at: string;
+  _id: string;
+  createdAt: string;
+  updatedAt: string;
   filename: string;
   name: string;
   descricao: string;
+  coords: LatLng;
   concluido?: boolean;
 };
 
 export type FocusDetailsDTO = {
-  cep: string;
-  cidade: string;
-  uf: string;
-  bairro: string;
-  numero: string;
-  logradouro: string;
-  complemento?: string;
+  user_id: string;
   userPhoto: string;
-  userLocal: string;
-  concluido?: boolean;
+  resolutionPhoto: string;
   userWhoFinished?: {
     name: string;
     userPhoto: string;

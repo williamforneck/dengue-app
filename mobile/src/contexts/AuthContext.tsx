@@ -1,4 +1,3 @@
-import { ReactNode, createContext, useEffect, useState } from "react";
 import {
   storageAuthTokenGet,
   storageAuthTokenRemove,
@@ -10,6 +9,8 @@ import {
   storageUserRemove,
   storageUserSave,
 } from "@storage/storageUser";
+import * as Location from "expo-location";
+import { ReactNode, createContext, useEffect, useState } from "react";
 
 import { Loading } from "@components/Loading";
 import { UserDTO } from "@dtos/UserDTO";
@@ -17,6 +18,7 @@ import { api } from "@services/api";
 
 export type AuthContextDataProps = {
   user: UserDTO;
+  location: Location.LocationObject | undefined
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   updateUserPoints: () => Promise<void>;
@@ -34,6 +36,8 @@ export const AuthContext = createContext<AuthContextDataProps>(
 
 export function AuthContextProvider({ children }: AuthContextProviderProps) {
   const [user, setUser] = useState<UserDTO>({} as UserDTO);
+  const [location, setLocation] = useState<Location.LocationObject>();
+
   const [isLoadingUserStorageData, setIsLoadingUserStorageData] =
     useState(true);
 
@@ -83,7 +87,7 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
       const userLogged = await storageUserGet();
       const { token } = await storageAuthTokenGet();
 
-      if (userLogged.id && token) {
+      if (userLogged._id && token) {
         updateUserAndToken(userLogged, token);
       }
     } catch (error) {
@@ -128,7 +132,36 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
     }
   }
 
+  const getPosition = async () => {
+    const permissions = await Location.getForegroundPermissionsAsync();
+
+    if (!permissions.granted) {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        console.log("Permission to access location was denied");
+        return;
+      }
+    }
+
+    const lastPosition = await Location.getLastKnownPositionAsync();
+
+    if (lastPosition) {
+      setLocation(lastPosition);
+    } else {
+      console.log(
+        "nenhuma posicao anterior fornecida, carregando posição atual",
+      );
+
+      let loc = await Location.getCurrentPositionAsync({
+        accuracy: Location.LocationAccuracy.BestForNavigation,
+      });
+      setLocation(loc);
+    }
+  };
+
+
   useEffect(() => {
+    getPosition();
     loadUserData();
   }, []);
 
@@ -153,6 +186,7 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
         isLoadingUserStorageData,
         updateUserProfile,
         updateUserPoints,
+        location
       }}
     >
       {children}

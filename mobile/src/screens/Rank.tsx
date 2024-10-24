@@ -1,13 +1,13 @@
 import { FlatList, Text, VStack, useToast } from "native-base";
 import { useCallback, useState } from "react";
 
-import { AppError } from "@utils/AppError";
 import { Loading } from "@components/Loading";
-import { ScreenHeader } from "@components/ScreenHeader";
-import { api } from "@services/api";
-import { useFocusEffect } from "@react-navigation/native";
-import { RankDTO } from "@dtos/RankDTO";
 import { RankCard } from "@components/RankCard";
+import { ScreenHeader } from "@components/ScreenHeader";
+import { RankDTO } from "@dtos/RankDTO";
+import { useFocusEffect } from "@react-navigation/native";
+import { api } from "@services/api";
+import { AppError } from "@utils/AppError";
 
 export function Rank() {
   const [ranks, setRanks] = useState<RankDTO[]>([]);
@@ -49,7 +49,7 @@ export function Rank() {
       ) : (
         <FlatList
           data={ranks}
-          keyExtractor={(item) => String(item.id)}
+          keyExtractor={(item) => String(item._id)}
           renderItem={({ item, index }) => (
             <RankCard
               data={item}

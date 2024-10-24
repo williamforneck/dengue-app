@@ -1,5 +1,5 @@
 export type RankDTO = {
-  id: number;
+  _id: string;
   pontos: number;
   avatar: string;
   name: string;

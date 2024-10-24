@@ -1,8 +1,8 @@
+import defaultUserPhotoImg from "@assets/userPhotoDefault.png";
 import { RankDTO } from "@dtos/RankDTO";
+import { useAuth } from "@hooks/useAuth";
 import { api } from "@services/api";
 import { HStack, Image, Text, VStack } from "native-base";
-import defaultUserPhotoImg from "@assets/userPhotoDefault.png";
-import { useAuth } from "@hooks/useAuth";
 
 type Props = {
   data: RankDTO;
@@ -21,7 +21,7 @@ export function RankCard({ data, position, mb = 3 }: Props) {
       mb={mb}
       bg={"gray.600"}
       borderColor={"green.500"}
-      borderWidth={user.id === data.id ? 1 : 0}
+      borderWidth={user._id === data._id ? 1 : 0}
       rounded="md"
       alignItems="center"
       justifyContent="space-between"

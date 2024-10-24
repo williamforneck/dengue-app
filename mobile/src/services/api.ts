@@ -1,8 +1,8 @@
-import axios, { AxiosError, AxiosInstance } from "axios";
 import {
   storageAuthTokenGet,
   storageAuthTokenSave,
 } from "@storage/storageAuthToken";
+import axios, { AxiosError, AxiosInstance } from "axios";
 
 import { AppError } from "@utils/AppError";
 
@@ -18,7 +18,8 @@ type PromiseType = {
 };
 
 const api = axios.create({
-  baseURL: "https://dengue-app-wgtn.onrender.com",
+  // baseURL: "https://dengue-app-wgtn.onrender.com",
+  baseURL: "http://localhost:3333",
 }) as APIInstanceProps;
 
 let failedQueue: PromiseType[] = [];

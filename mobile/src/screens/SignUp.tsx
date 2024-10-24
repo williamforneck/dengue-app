@@ -12,29 +12,22 @@ import {
 } from "native-base";
 import { Controller, useForm } from "react-hook-form";
 
-import { AppError } from "@utils/AppError";
 import BackgroundImage from "@assets/background1.png";
+import LogoSvg from "@assets/logo.svg";
 import { Button } from "@components/Button";
 import { Input } from "@components/Input";
-import LogoSvg from "@assets/logo.svg";
-import { api } from "@services/api";
+import { yupResolver } from "@hookform/resolvers/yup";
 import { useAuth } from "@hooks/useAuth";
 import { useNavigation } from "@react-navigation/native";
-import React, { useRef, useState } from "react";
-import { yupResolver } from "@hookform/resolvers/yup";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { api } from "@services/api";
+import { AppError } from "@utils/AppError";
+import React, { useState } from "react";
 import { Platform } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 type FormDataProps = {
   name: string;
   email: string;
-  cep: string;
-  cidade: string;
-  uf: string;
-  logradouro: string;
-  bairro: string;
-  numero: string;
-  complemento?: string;
   password: string;
   password_confirm: string;
 };
@@ -42,17 +35,6 @@ type FormDataProps = {
 const signUpSchema = yup.object({
   name: yup.string().required("Informe o nome."),
   email: yup.string().required("Informe o e-mail.").email("E-mail inválido."),
-  cep: yup
-    .string()
-    .required("Informe o cep.")
-    .min(8, "O CEP deve ter 8 dígitos.")
-    .max(8, "O CEP deve ter 8 dígitos."),
-  cidade: yup.string().required("Informe a cidade."),
-  uf: yup.string().required("Informe a UF."),
-  logradouro: yup.string().required("Informe o logradouro."),
-  bairro: yup.string().required("Informe o bairro."),
-  numero: yup.string().required("Informe o numero."),
-  complemento: yup.string(),
   password: yup
     .string()
     .required("Informe a senha.")
@@ -193,93 +175,6 @@ export function SignUp() {
                   onSubmitEditing={handleSubmit(handleSignUp)}
                   returnKeyType="send"
                   errorMessage={errors.password_confirm?.message}
-                />
-              )}
-            />
-            <Heading color="gray.100" fontSize="xl" fontFamily="heading" mb={6}>
-              Endereço:
-            </Heading>
-            <Controller
-              control={control}
-              name="cep"
-              render={({ field: { onChange, value } }) => (
-                <Input
-                  onChangeText={onChange}
-                  value={value}
-                  placeholder="CEP"
-                  errorMessage={errors.cep?.message}
-                />
-              )}
-            />
-            <Controller
-              control={control}
-              name="uf"
-              render={({ field: { onChange, value } }) => (
-                <Input
-                  onChangeText={onChange}
-                  value={value}
-                  placeholder="UF"
-                  errorMessage={errors.uf?.message}
-                />
-              )}
-            />
-            <Controller
-              control={control}
-              name="cidade"
-              render={({ field: { onChange, value } }) => (
-                <Input
-                  onChangeText={onChange}
-                  value={value}
-                  placeholder="Cidade"
-                  errorMessage={errors.cidade?.message}
-                />
-              )}
-            />
-            <Controller
-              control={control}
-              name="bairro"
-              render={({ field: { onChange, value } }) => (
-                <Input
-                  onChangeText={onChange}
-                  value={value}
-                  placeholder="Bairro"
-                  errorMessage={errors.bairro?.message}
-                />
-              )}
-            />
-            <Controller
-              control={control}
-              name="logradouro"
-              render={({ field: { onChange, value } }) => (
-                <Input
-                  onChangeText={onChange}
-                  value={value}
-                  placeholder="Logradouro"
-                  errorMessage={errors.logradouro?.message}
-                />
-              )}
-            />
-            <Controller
-              control={control}
-              name="numero"
-              render={({ field: { onChange, value } }) => (
-                <Input
-                  onChangeText={onChange}
-                  value={value}
-                  placeholder="Número"
-                  errorMessage={errors.numero?.message}
-                />
-              )}
-            />
-            <Controller
-              control={control}
-              name="complemento"
-              render={({ field: { onChange, value } }) => (
-                <Input
-                  onChangeText={onChange}
-                  value={value}
-                  placeholder="Complemento"
-                  errorMessage={errors.complemento?.message}
                 />
               )}
             />

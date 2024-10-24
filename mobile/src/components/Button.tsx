@@ -3,16 +3,18 @@ import { Button as ButtonNativeBase, IButtonProps, Text } from "native-base";
 type Props = IButtonProps & {
   title: string;
   variant?: "solid" | "outline";
+  type?: 'error' | 'normal'
 };
 
-export function Button({ title, variant = "solid", ...rest }: Props) {
+export function Button({ title, type = 'normal', variant = "solid", ...rest }: Props) {
   return (
     <ButtonNativeBase
       w="full"
       h={14}
+      opacity={rest.disabled ? 0.3 : 1}
       bg={variant === "outline" ? "transparent" : "green.700"}
       borderWidth={variant === "outline" ? 1 : 0}
-      borderColor="green.500"
+      borderColor={type === 'normal' ? 'green.500' : 'red.500'}
       {...rest}
       rounded="sm"
       _pressed={{
@@ -20,7 +22,7 @@ export function Button({ title, variant = "solid", ...rest }: Props) {
       }}
     >
       <Text
-        color={variant === "outline" ? "green.500" : "white"}
+        color={variant === "outline" && type === 'normal' ? "green.500" : type === 'error' && variant === 'outline' ? 'red.500' : "white"}
         fontFamily="heading"
         fontSize="sm"
       >

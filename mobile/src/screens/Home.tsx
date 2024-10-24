@@ -1,31 +1,40 @@
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import {
   HStack,
   Heading,
-  SectionList,
   Text,
   VStack,
-  useToast,
+  useToast
 } from "native-base";
-import { useCallback, useState } from "react";
-import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-import { AppError } from "@utils/AppError";
-import { AppNavigatorRoutesProps } from "@routes/app.routes";
-import { FocusCard } from "@components/FocusCard";
-import { FocusResponseDTO } from "@dtos/FocusDTO";
+import focoImg from "@assets/foco.png";
+import focoCheckImg from "@assets/foco_check.png";
+import { Button } from "@components/Button";
 import { HomeHeader } from "@components/HomeHeader";
 import { Loading } from "@components/Loading";
+import { FocusDto } from "@dtos/FocusDTO";
+import { useAuth } from "@hooks/useAuth";
+import { AppNavigatorRoutesProps } from "@routes/app.routes";
 import { api } from "@services/api";
-import { Button } from "@components/Button";
+import { AppError } from "@utils/AppError";
+import MapView, { Marker } from "react-native-maps";
 
 export function Home() {
   const [isLoading, setIsLoading] = useState(true);
-  const [focus, setFocus] = useState<FocusResponseDTO[]>([]);
+  const [focus, setFocus] = useState<FocusDto[]>([]);
   const navigation = useNavigation<AppNavigatorRoutesProps>();
-  const totalItems = focus.reduce(
-    (acc, value) => (acc += value.data.length),
-    0
-  );
+  const { location } = useAuth()
+  const mapRef = useRef<MapView>(null);
+
+  useEffect(() => {
+    if (location && mapRef) {
+      mapRef.current?.animateCamera(
+        { center: location.coords, altitude: 700, zoom: 18 },
+        { duration: 800 },
+      );
+    }
+  }, [location])
 
   const toast = useToast();
 
@@ -54,7 +63,7 @@ export function Home() {
     }
   }
 
-  const goToDetails = (id: number) => {
+  const goToDetails = (id: string) => {
     navigation.navigate("focusDetails", { id });
   };
 
@@ -63,45 +72,51 @@ export function Home() {
       getFocus();
     }, [])
   );
+
+  const openFoco = (foco: FocusDto) => {
+    goToDetails(foco._id)
+  }
+
   return (
     <VStack flex={1}>
       <HomeHeader />
-      <VStack px={8} my={8}>
+      <VStack px={4} my={4}>
         <Button onPress={handleOpenExerciseDetails} title="Adicionar foco" />
       </VStack>
 
       {isLoading ? (
         <Loading />
       ) : (
-        <VStack flex={1} px={8}>
+        <VStack flex={1} px={4}>
           <HStack justifyContent="space-between" mb={5}>
             <Heading color="gray.200" fontSize="md" fontFamily="heading">
               Focos de dengue
             </Heading>
             <Text color="gray.200" fontSize="sm">
-              {totalItems}
+              {focus.length}
             </Text>
           </HStack>
-          <SectionList
-            sections={focus}
-            keyExtractor={(item) => String(item.id)}
-            renderItem={({ item }) => (
-              <FocusCard onPress={() => goToDetails(item.id)} data={item} />
-            )}
-            renderSectionHeader={({ section }) => (
-              <Heading
-                fontFamily="heading"
-                color="gray.200"
-                fontSize="md"
-                mb={3}
-                textAlign={"center"}
-              >
-                {section.title}
-              </Heading>
-            )}
-            paddingBottom={20}
-            showsVerticalScrollIndicator={false}
-          />
+          <MapView
+            showsUserLocation
+            ref={mapRef}
+            style={{
+              position: 'absolute',
+              left: 12,
+              right: 12,
+              top: 32,
+              bottom: 12,
+              borderRadius: 24,
+            }}
+            initialRegion={{
+              latitude: location?.coords.latitude ?? -29.8623591788761,
+              longitude: location?.coords.longitude ?? -50.62139922629445,
+              latitudeDelta: 0.0922,
+              longitudeDelta: 0.0421,
+            }}
+            rotateEnabled={false}
+          >
+            {focus.map((f, i) => <Marker onPress={() => openFoco(f)} image={f.concluido ? focoCheckImg : focoImg} key={i} coordinate={f.coords}></Marker>)}
+          </MapView>
         </VStack>
       )}
     </VStack>

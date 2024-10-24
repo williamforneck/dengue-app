@@ -3,23 +3,23 @@ import {
   createBottomTabNavigator,
 } from "@react-navigation/bottom-tabs";
 
-import { NewFocus } from "@screens/NewFocus";
-import { Rank } from "@screens/Rank";
-import RankSvg from "@assets/rank.svg";
-import { Home } from "@screens/Home";
 import HomeSvg from "@assets/home.svg";
-import { Platform } from "react-native";
-import { Profile } from "@screens/Profile";
 import ProfileSvg from "@assets/profile.svg";
-import { useTheme } from "native-base";
+import RankSvg from "@assets/rank.svg";
 import { FocusDetails } from "@screens/FocusDetails";
+import { Home } from "@screens/Home";
+import { NewFocus } from "@screens/NewFocus";
+import { Profile } from "@screens/Profile";
+import { Rank } from "@screens/Rank";
+import { useTheme } from "native-base";
+import { Platform } from "react-native";
 
 type AppRoutes = {
   home: undefined;
   history: undefined;
   profile: undefined;
   addFocus: undefined;
-  focusDetails: { id: number };
+  focusDetails: { id: string };
 };
 
 export type AppNavigatorRoutesProps = BottomTabNavigationProp<AppRoutes>;

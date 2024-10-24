@@ -1,59 +1,49 @@
+import CloseSvg from "@assets/close.svg";
+import ImageSvg from "@assets/photo.svg";
+import { useNavigation } from "@react-navigation/native";
 import {
+  Box,
+  Center,
   HStack,
   Heading,
   Icon,
   Image,
-  Skeleton,
+  Modal,
   ScrollView,
+  Skeleton,
   Text,
   VStack,
+  useTheme,
   useToast,
-  Center,
 } from "native-base";
 import { useState } from "react";
-import { useNavigation } from "@react-navigation/native";
 
-import { AppError } from "@utils/AppError";
-import { AppNavigatorRoutesProps } from "@routes/app.routes";
 import { Button } from "@components/Button";
-import { Feather } from "@expo/vector-icons";
-import { Loading } from "@components/Loading";
-import { Platform, TouchableOpacity } from "react-native";
-import { api } from "@services/api";
-import { Controller, useForm } from "react-hook-form";
-import * as yup from "yup";
-import { yupResolver } from "@hookform/resolvers/yup";
 import { Input } from "@components/Input";
+import { Loading } from "@components/Loading";
+import { Feather } from "@expo/vector-icons";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { useAuth } from "@hooks/useAuth";
+import { AppNavigatorRoutesProps } from "@routes/app.routes";
+import { api } from "@services/api";
+import { AppError } from "@utils/AppError";
 import * as FileSystem from "expo-file-system";
 import * as ImagePicker from "expo-image-picker";
-import { useAuth } from "@hooks/useAuth";
-import defaultUserPhotoImg from "@assets/userPhotoDefault.png";
+import { Controller, useForm } from "react-hook-form";
+import { Dimensions, Platform, TouchableOpacity } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import MapView, {
+  LatLng,
+  Marker,
+} from "react-native-maps";
+import * as yup from "yup";
 
 type FormDataProps = {
   descricao: string;
-  cep: string;
-  cidade: string;
-  uf: string;
-  logradouro: string;
-  bairro: string;
-  numero: string;
-  complemento?: string;
 };
 
 const focoSchema = yup.object({
-  cep: yup
-    .string()
-    .required("Informe o cep.")
-    .min(8, "O CEP deve ter 8 dígitos.")
-    .max(8, "O CEP deve ter 8 dígitos."),
   descricao: yup.string().required("Informe uma breve descrição."),
-  cidade: yup.string().required("Informe a cidade."),
-  uf: yup.string().required("Informe a UF."),
-  logradouro: yup.string().required("Informe o logradouro."),
-  bairro: yup.string().required("Informe o bairro."),
-  numero: yup.string().required("Informe o numero."),
-  complemento: yup.string(),
 });
 
 const PHOTO_SIZE = 33;
@@ -64,9 +54,14 @@ export function NewFocus() {
   const [isLoading, setIsLoading] = useState(false);
   const [photoIsLoading, setPhotoIsLoading] = useState(false);
   const [photo, setPhoto] = useState("");
+  const [coords, setCoords] = useState<LatLng>();
+  const [openMap, setOpenMap] = useState<boolean>();
+  const theme = useTheme()
+  const { location } = useAuth()
   const {
     control,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm<FormDataProps>({
     resolver: yupResolver(focoSchema),
@@ -146,11 +141,21 @@ export function NewFocus() {
       });
       return;
     }
+
+    if (!coords) {
+      toast.show({
+        title: "Selecione o local do foco",
+        bgColor: "red.500",
+        placement: "top",
+      });
+      return;
+    }
     setIsLoading(true);
 
     const data = {
       ...event,
       filename: photo,
+      coords
     };
 
     try {
@@ -161,6 +166,7 @@ export function NewFocus() {
         placement: "top",
       });
       await updateUserPoints();
+      resetData()
       handleGoBack();
     } catch (error) {
       const isAppError = error instanceof AppError;
@@ -176,196 +182,169 @@ export function NewFocus() {
     }
   };
 
-  return (
-    <VStack flex={1}>
-      {isLoading ? (
-        <Loading />
-      ) : (
-        <>
-          <VStack px={8} bg="gray.600" pt={12}>
-            <HStack
-              justifyContent="space-between"
-              mt={4}
-              mb={8}
-              alignItems="center"
-            >
-              <TouchableOpacity onPress={handleGoBack}>
-                <Icon
-                  as={Feather}
-                  name="arrow-left"
-                  color="green.500"
-                  size={6}
-                />
-              </TouchableOpacity>
-              <Heading
-                color="gray.100"
-                fontSize="lg"
-                flexShrink={1}
-                fontFamily="heading"
-              >
-                Adicionar foco
-              </Heading>
-            </HStack>
-          </VStack>
-          <KeyboardAwareScrollView
-            enableAutomaticScroll
-            keyboardOpeningTime={0}
-            viewIsInsideTabBar
-            extraHeight={Platform.select({ ios: 180 })}
-          >
-            <ScrollView>
-              <VStack p={8}>
-                <Center>
-                  {photoIsLoading ? (
-                    <Skeleton
-                      w={PHOTO_SIZE}
-                      h={PHOTO_SIZE}
-                      startColor="gray.500"
-                      endColor="gray.400"
-                    />
-                  ) : (
-                    <Image
-                      w={PHOTO_SIZE}
-                      h={PHOTO_SIZE}
-                      borderWidth={2}
-                      borderColor="gray.400"
-                      source={
-                        photo.length
-                          ? {
-                              uri: `${api.defaults.baseURL}/avatar/${photo}`,
-                            }
-                          : defaultUserPhotoImg
-                      }
-                      alt="Foto do local"
-                    />
-                  )}
-                  <TouchableOpacity onPress={handleUserPhotoSelect}>
-                    <Text
-                      color="green.500"
-                      fontFamily="heading"
-                      fontSize="md"
-                      mt={2}
-                      mb={8}
-                    >
-                      Enviar foto
-                    </Text>
-                  </TouchableOpacity>
+  const resetData = () => {
+    setPhoto('')
+    setCoords(undefined)
+    reset()
+  }
 
-                  <Controller
-                    control={control}
-                    name="descricao"
-                    render={({ field: { onChange, value } }) => (
-                      <Input
-                        onChangeText={onChange}
-                        value={value}
-                        placeholder="Descrição"
-                        errorMessage={errors.descricao?.message}
+  return (
+    <>
+      <VStack flex={1}>
+        {isLoading ? (
+          <Loading />
+        ) : (
+          <>
+            <VStack px={8} bg="gray.600" pt={12}>
+              <HStack
+                justifyContent="space-between"
+                mt={4}
+                mb={4}
+                alignItems="center"
+              >
+                <TouchableOpacity onPress={handleGoBack}>
+                  <Icon
+                    as={Feather}
+                    name="arrow-left"
+                    color="green.500"
+                    size={6}
+                  />
+                </TouchableOpacity>
+                <Heading
+                  color="gray.100"
+                  fontSize="lg"
+                  flexShrink={1}
+                  fontFamily="heading"
+                >
+                  Adicionar foco
+                </Heading>
+              </HStack>
+            </VStack>
+            <KeyboardAwareScrollView
+              enableAutomaticScroll
+              keyboardOpeningTime={0}
+              viewIsInsideTabBar
+              extraHeight={Platform.select({ ios: 180 })}
+            >
+              <ScrollView>
+                <VStack p={8}>
+                  <Center>
+                    {photoIsLoading ? (
+                      <Skeleton
+                        rounded={'2xl'}
+                        w={PHOTO_SIZE}
+                        h={PHOTO_SIZE}
+                        startColor="gray.500"
+                        endColor="gray.400"
                       />
+                    ) : (
+                      <>
+                        {photo.length ? (
+                          <Image
+                            w={'full'}
+                            h={PHOTO_SIZE}
+                            rounded={'2xl'}
+                            source={{ uri: `${api.defaults.baseURL}/avatar/${photo}` }}
+                            alt="Foto do local"
+                          />
+                        ) : (<ImageSvg width={160} height={160} onPress={handleUserPhotoSelect} stroke={theme.colors.gray[100]} />)}
+                      </>
                     )}
-                  />
-                  <Heading
-                    color="gray.100"
-                    fontSize="xl"
-                    fontFamily="heading"
-                    mb={6}
-                  >
-                    Endereço:
-                  </Heading>
-                  <Controller
-                    control={control}
-                    name="cep"
-                    render={({ field: { onChange, value } }) => (
-                      <Input
-                        onChangeText={onChange}
-                        value={value}
-                        placeholder="CEP"
-                        errorMessage={errors.cep?.message}
-                      />
-                    )}
-                  />
-                  <Controller
-                    control={control}
-                    name="cidade"
-                    render={({ field: { onChange, value } }) => (
-                      <Input
-                        onChangeText={onChange}
-                        value={value}
-                        placeholder="Cidade"
-                        errorMessage={errors.cidade?.message}
-                      />
-                    )}
-                  />
-                  <Controller
-                    control={control}
-                    name="uf"
-                    render={({ field: { onChange, value } }) => (
-                      <Input
-                        onChangeText={onChange}
-                        value={value}
-                        placeholder="UF"
-                        errorMessage={errors.uf?.message}
-                      />
-                    )}
-                  />
-                  <Controller
-                    control={control}
-                    name="bairro"
-                    render={({ field: { onChange, value } }) => (
-                      <Input
-                        onChangeText={onChange}
-                        value={value}
-                        placeholder="Bairro"
-                        errorMessage={errors.bairro?.message}
-                      />
-                    )}
-                  />
-                  <Controller
-                    control={control}
-                    name="logradouro"
-                    render={({ field: { onChange, value } }) => (
-                      <Input
-                        onChangeText={onChange}
-                        value={value}
-                        placeholder="Logradouro"
-                        errorMessage={errors.logradouro?.message}
-                      />
-                    )}
-                  />
-                  <Controller
-                    control={control}
-                    name="numero"
-                    render={({ field: { onChange, value } }) => (
-                      <Input
-                        onChangeText={onChange}
-                        value={value}
-                        placeholder="Número"
-                        errorMessage={errors.numero?.message}
-                      />
-                    )}
-                  />
-                  <Controller
-                    control={control}
-                    name="complemento"
-                    render={({ field: { onChange, value } }) => (
-                      <Input
-                        onChangeText={onChange}
-                        value={value}
-                        placeholder="Complemento"
-                        errorMessage={errors.complemento?.message}
-                      />
-                    )}
-                  />
-                  <Button
-                    title="Cadastrar"
-                    isLoading={isLoading}
-                    onPress={handleSubmit(handleCreateFocus)}
-                  />
-                </Center>
-              </VStack>
-            </ScrollView>
-          </KeyboardAwareScrollView>
-        </>
-      )}
-    </VStack>
+                    <TouchableOpacity onPress={handleUserPhotoSelect}>
+                      <Text
+                        color="green.500"
+                        fontFamily="heading"
+                        fontSize="md"
+                        mt={2}
+                        mb={8}
+                      >
+                        Enviar foto
+                      </Text>
+                    </TouchableOpacity>
+
+                    <Controller
+                      control={control}
+                      name="descricao"
+                      render={({ field: { onChange, value } }) => (
+                        <Input
+                          onChangeText={onChange}
+                          value={value}
+                          placeholder="Descrição"
+                          errorMessage={errors.descricao?.message}
+                        />
+                      )}
+                    />
+
+                    <TouchableOpacity onPress={() => setOpenMap(true)}>
+                      <Text
+                        color="green.500"
+                        fontFamily="heading"
+                        fontSize="md"
+                        mt={2}
+                        mb={8}
+                      >
+                        Escolher local
+                      </Text>
+                    </TouchableOpacity>
+
+                    <Button
+                      title="Cadastrar"
+                      isLoading={isLoading}
+                      onPress={handleSubmit(handleCreateFocus)}
+                    />
+                  </Center>
+                </VStack>
+              </ScrollView>
+            </KeyboardAwareScrollView>
+          </>
+        )}
+      </VStack>
+      <Modal
+        shadow={"9"}
+        roundedTop={24}
+        isOpen={openMap}
+        animationPreset="slide"
+        bg={'gray.500'}
+        h={Dimensions.get("screen").height / 6 * 5}
+        top={Dimensions.get("screen").height / 6}
+        overflow={'hidden'}>
+        <Box flex={1} w={'full'} px={4} pb={12} pt={4} position={'relative'} >
+          <HStack flex={1} justifyContent={"space-between"}>
+            <Heading fontSize={"lg"} fontFamily={"heading"} color="gray.100">
+              Escolher local
+            </Heading>
+            <TouchableOpacity onPress={() => {
+              setOpenMap(false)
+              setCoords(undefined)
+            }}>
+              <CloseSvg fill={theme.colors.gray[100]} />
+            </TouchableOpacity>
+          </HStack>
+          <MapView
+            showsUserLocation
+            style={{
+              position: 'absolute',
+              left: 12,
+              right: 12,
+              top: 56,
+              bottom: 120,
+              borderRadius: 24,
+            }}
+            onPress={(evt) => setCoords(evt.nativeEvent.coordinate)}
+            initialRegion={{
+              latitude: location?.coords.latitude ?? -29.8623591788761,
+              longitude: location?.coords.longitude ?? -50.62139922629445,
+              latitudeDelta: 0.0922,
+              longitudeDelta: 0.0421,
+            }}
+            rotateEnabled={false}
+          >
+            {coords && <Marker draggable coordinate={coords}></Marker>}
+          </MapView>
+          <Button onPress={() => setOpenMap(false)} disabled={!coords} title="Confirmar localização" />
+        </Box>
+      </Modal>
+    </>
+
   );
 }

@@ -13,17 +13,17 @@ import {
 } from "native-base";
 import { Controller, useForm } from "react-hook-form";
 
-import { AppError } from "@utils/AppError";
+import defaultUserPhotoImg from "@assets/userPhotoDefault.png";
 import { Button } from "@components/Button";
 import { Input } from "@components/Input";
 import { ScreenHeader } from "@components/ScreenHeader";
-import { Platform, TouchableOpacity } from "react-native";
 import { UserPhoto } from "@components/UserPhoto";
-import { api } from "@services/api";
-import defaultUserPhotoImg from "@assets/userPhotoDefault.png";
-import { useAuth } from "@hooks/useAuth";
-import { useState } from "react";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { useAuth } from "@hooks/useAuth";
+import { api } from "@services/api";
+import { AppError } from "@utils/AppError";
+import { useState } from "react";
+import { Platform, TouchableOpacity } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 const PHOTO_SIZE = 33;
