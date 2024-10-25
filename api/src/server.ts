@@ -1,49 +1,74 @@
+import cors from "@fastify/cors";
+import multipart from "@fastify/multipart";
+import Fastify, { FastifyInstance } from "fastify";
 import { getMongoClient } from "./configs/db";
+import { FocusController } from "./controllers/FocusController";
+import { RankController } from "./controllers/RankController";
+import { SessionsController } from "./controllers/SessionsController";
+import { UserRefreshToken } from "./controllers/UserRefreshToken";
+import { UsersController } from "./controllers/UsersController";
+import { AuthMiddleware } from "./middlewares/middleware";
+import { uploadFile } from "./providers/files";
 
-require("express-async-errors");
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+require("dotenv").config();
 
-import path from "path";
+const server: FastifyInstance = Fastify();
 
-import cors from "cors";
-import express from "express";
-import uploadConfig from "./configs/upload";
-import routes from "./routes";
-import { AppError } from "./utils/AppError";
+const privateRoutes = async (fastify: FastifyInstance) => {
+  fastify.addHook("preHandler", AuthMiddleware);
 
-const app = express();
+  const focusController = new FocusController();
+  fastify.post("/focus", focusController.create);
+  fastify.get("/focus", focusController.index);
+  fastify.get("/focus/:id", focusController.getFocus);
+  fastify.delete("/focus/:id", focusController.deleteFocus);
+  fastify.put("/focus/:id", focusController.markAsFinished);
 
-app.use("/avatar", express.static(uploadConfig.UPLOADS_FOLDER));
+  const rankController = new RankController();
+  fastify.get("/rank", rankController.index);
+  fastify.get("/rank/points", rankController.getPoints);
 
-const demoExercisePath = path.resolve(__dirname, "..", "exercises", "gif");
-app.use("/exercise/demo", express.static(demoExercisePath));
+  const usersController = new UsersController();
+  fastify.put("/users", usersController.update);
+  fastify.patch("/users", usersController.updateAvatar);
 
-const thumbExercisesPath = path.resolve(__dirname, "..", "exercises", "thumb");
-app.use("/exercise/thumb", express.static(thumbExercisesPath));
+  fastify.post("/upload", uploadFile);
+};
 
-app.use(express.json());
-app.use(cors());
+const publicRoutes = async (fastify: FastifyInstance) => {
+  const sessionsController = new SessionsController();
+  fastify.post("/sessions", sessionsController.create);
 
-app.use(routes);
+  const userRefreshToken = new UserRefreshToken();
+  fastify.post("/sessions/refresh-token", userRefreshToken.create);
 
-app.use((err: any, request: any, response: any, next: any) => {
-  if (err instanceof AppError) {
-    console.log(err);
-    return response.status(err.statusCode).json({
-      status: "error",
-      message: err.message,
-    });
-  }
+  const usersController = new UsersController();
+  fastify.post("/users", usersController.create);
+};
 
-  console.error(err);
-
-  return response.status(500).json({
-    status: "error",
-    message: "Internal server error",
-  });
-});
-
-const PORT = process.env.PORT || 3333;
-app.listen(PORT, async () => {
+async function init() {
   await getMongoClient();
-  console.log(`Server is running on Port ${PORT}`);
-});
+  server.register(cors);
+  server.register(multipart, {
+    limits: {
+      fileSize: 1024 * 1024 * 20, // For multipart forms, the max file size in bytes
+      files: 20, // Max number of file fields
+    },
+  });
+  server.register(privateRoutes);
+  server.register(publicRoutes);
+
+  const port = Number(process.env.PORT) || 8080;
+
+  server
+    .listen({
+      host: "0.0.0.0",
+      port,
+    })
+    .then(() => {
+      console.log("server running on " + port);
+    });
+}
+
+init();

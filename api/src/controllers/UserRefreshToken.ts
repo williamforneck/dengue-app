@@ -1,12 +1,16 @@
 import dayjs from "dayjs";
+import { FastifyReply, FastifyRequest } from "fastify";
 import { getDb } from "../configs/db";
 import { GenerateRefreshToken } from "../providers/GenerateRefreshToken";
 import { GenerateToken } from "../providers/GenerateToken";
 import { AppError } from "../utils/AppError";
 
 export class UserRefreshToken {
-  async create(request: any, response: any) {
-    const { refresh_token } = request.body;
+  async create(
+    req: FastifyRequest<{ Body: { refresh_token: string } }>,
+    res: FastifyReply
+  ) {
+    const { refresh_token } = req.body;
 
     if (!refresh_token) {
       throw new AppError("Informe o token de autenticação.", 401);
@@ -42,9 +46,9 @@ export class UserRefreshToken {
         refreshToken.user_id
       );
 
-      return response.json({ token, refresh_token: newRefreshToken });
+      return res.send({ token, refresh_token: newRefreshToken });
     }
 
-    return response.json({ token, refresh_token });
+    return res.send({ token, refresh_token });
   }
 }

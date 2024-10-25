@@ -3,6 +3,4 @@ export type RankDTO = {
   pontos: number;
   avatar: string;
   name: string;
-  cidade: string;
-  uf: string;
 };

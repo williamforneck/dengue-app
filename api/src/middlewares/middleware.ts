@@ -1,13 +1,12 @@
+import { FastifyReply, FastifyRequest } from "fastify";
 import { verify } from "jsonwebtoken";
 import authConfig from "../configs/auth";
 import { AppError } from "../utils/AppError";
-
-export async function ensureAuthenticated(
-  request: any,
-  response: any,
-  next: any
-) {
-  const authHeader = request.headers.authorization;
+export const AuthMiddleware = async (
+  req: FastifyRequest,
+  res: FastifyReply
+) => {
+  const authHeader = req.headers.authorization;
 
   if (!authHeader) {
     throw new AppError("JWT token não informado", 401);
@@ -18,12 +17,8 @@ export async function ensureAuthenticated(
   try {
     const { sub: user_id } = verify(token, authConfig.jwt.secret);
 
-    request.user = {
-      _id: user_id,
-    };
-
-    return next();
+    req.headers.user = user_id?.toString();
   } catch {
     throw new AppError("token.invalid", 401);
   }
-}
+};

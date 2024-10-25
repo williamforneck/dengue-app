@@ -1,8 +1,9 @@
+import { FastifyReply, FastifyRequest } from "fastify";
 import { ObjectId } from "mongodb";
 import { getDb } from "../configs/db";
 
 export class RankController {
-  async index(request: any, response: any) {
+  async index(req: FastifyRequest, res: FastifyReply) {
     const db = await getDb();
     const rank = await db
       .collection("users")
@@ -18,11 +19,11 @@ export class RankController {
       .sort({ pontos: -1 })
       .toArray();
 
-    return response.json(rank);
+    return res.send(rank);
   }
 
-  async getPoints(request: any, response: any) {
-    const user_id: string = request.user._id;
+  async getPoints(req: FastifyRequest, res: FastifyReply) {
+    const user_id: string = req.headers.user as string;
 
     const db = await getDb();
 
@@ -30,6 +31,6 @@ export class RankController {
       .collection("users")
       .findOne({ _id: new ObjectId(user_id) });
 
-    return response.json({ pontos: rank?.pontos });
+    return res.send({ pontos: rank?.pontos });
   }
 }

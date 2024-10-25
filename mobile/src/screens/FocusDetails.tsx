@@ -167,9 +167,9 @@ export function FocusDetails() {
 
         const userPhotoUploadForm = new FormData();
 
-        userPhotoUploadForm.append("imagem", photoFile);
+        userPhotoUploadForm.append("file", photoFile);
 
-        const response = await api.post("/uploads", userPhotoUploadForm, {
+        const response = await api.post("/upload", userPhotoUploadForm, {
           headers: {
             "Content-Type": "multipart/form-data",
           },
@@ -236,7 +236,7 @@ export function FocusDetails() {
                     source={
                       focus.userPhoto
                         ? {
-                          uri: `${api.defaults.baseURL}/avatar/${focus.userPhoto}`,
+                          uri: focus.userPhoto,
                         }
                         : defaultUserPhotoImg
                     }
@@ -261,7 +261,7 @@ export function FocusDetails() {
                     w={"full"}
                     h={PHOTO_SIZE}
                     source={{
-                      uri: `${api.defaults.baseURL}/avatar/${focus.filename}`,
+                      uri: focus.filename,
                     }}
                     rounded={4}
                     alt="Foto do local"
@@ -316,7 +316,7 @@ export function FocusDetails() {
                         source={
                           focus.userWhoFinished.userPhoto
                             ? {
-                              uri: `${api.defaults.baseURL}/avatar/${focus.userWhoFinished.userPhoto}`,
+                              uri: focus.userWhoFinished.userPhoto,
                             }
                             : defaultUserPhotoImg
                         }
@@ -346,7 +346,7 @@ export function FocusDetails() {
                         w={"full"}
                         h={PHOTO_SIZE}
                         source={{
-                          uri: `${api.defaults.baseURL}/avatar/${focus.resolutionPhoto}`,
+                          uri: focus.resolutionPhoto,
                         }}
                         rounded={4}
                         alt="Foto do local"
@@ -402,7 +402,7 @@ export function FocusDetails() {
                     w={'full'}
                     h={PHOTO_SIZE}
                     rounded={'2xl'}
-                    source={{ uri: `${api.defaults.baseURL}/avatar/${photo}` }}
+                    source={{ uri: photo }}
                     alt="Foto do local"
                   />
                 ) : (<ImageSvg onPress={handleUserPhotoSelect} stroke={theme.colors.gray[100]} />)}

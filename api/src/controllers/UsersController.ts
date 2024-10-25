@@ -1,12 +1,19 @@
 import { getDb } from "../configs/db";
 
 import { compare, hash } from "bcryptjs";
+import { FastifyReply, FastifyRequest } from "fastify";
 import { ObjectId } from "mongodb";
 import { AppError } from "../utils/AppError";
 
 export class UsersController {
-  async create(request: any, response: any) {
-    const { name, email, password } = request.body;
+  async create(
+    req: FastifyRequest<{
+      Body: { name: string; password: string; email: string };
+    }>,
+    res: FastifyReply
+  ) {
+    console.log(req.body);
+    const { name, email, password } = req.body;
     if (!name || !email || !password) {
       throw new AppError("Informe todos os campos (nome, email e senha).");
     }
@@ -27,12 +34,17 @@ export class UsersController {
       password: hashedPassword,
     });
 
-    return response.status(201).json();
+    return res.status(201).send();
   }
 
-  async update(request: any, response: any) {
-    const { name, password, old_password } = request.body;
-    const user_id = request.user._id;
+  async update(
+    req: FastifyRequest<{
+      Body: { name: string; password: string; old_password: string };
+    }>,
+    res: FastifyReply
+  ) {
+    const { name, password, old_password } = req.body;
+    const user_id = req.headers.user as string;
     const db = await getDb();
 
     const user = await db
@@ -69,6 +81,37 @@ export class UsersController {
       .collection("users")
       .updateOne({ _id: new ObjectId(user_id as string) }, { $set: user });
 
-    return response.json();
+    return res.send();
+  }
+
+  async updateAvatar(
+    req: FastifyRequest<{
+      Body: { filename: string };
+    }>,
+    res: FastifyReply
+  ) {
+    const { filename } = req.body;
+    const user_id = req.headers.user as string;
+    const db = await getDb();
+
+    const user = await db
+      .collection("users")
+      .findOne({ _id: new ObjectId(user_id as string) });
+
+    if (!user) {
+      throw new AppError("Usuário não encontrado", 404);
+    }
+
+    if (!filename || !user_id) {
+      throw new AppError("Erro ao tentar atualizar a foto de perfil");
+    }
+
+    user.avatar = filename ?? user.avatar;
+
+    await db
+      .collection("users")
+      .updateOne({ _id: new ObjectId(user_id as string) }, { $set: user });
+
+    return res.send();
   }
 }

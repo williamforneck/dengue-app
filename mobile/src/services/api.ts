@@ -19,7 +19,7 @@ type PromiseType = {
 
 const api = axios.create({
   // baseURL: "https://dengue-app-wgtn.onrender.com",
-  baseURL: "http://localhost:3333",
+  baseURL: "http://localhost:8080",
 }) as APIInstanceProps;
 
 let failedQueue: PromiseType[] = [];

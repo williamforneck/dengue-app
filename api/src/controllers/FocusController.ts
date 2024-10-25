@@ -1,11 +1,11 @@
+import { FastifyReply, FastifyRequest } from "fastify";
 import { ObjectId } from "mongodb";
 import { getDb } from "../configs/db";
-import { DiskStorage } from "../providers/DiskStorage";
 import { AppError } from "../utils/AppError";
 import { getDateInfo } from "../utils/getDateInfo";
 
 export class FocusController {
-  async index(request: any, response: any) {
+  async index(req: FastifyRequest, res: FastifyReply) {
     const db = await getDb();
 
     const focus = await db
@@ -26,38 +26,44 @@ export class FocusController {
       ])
       .toArray();
 
-    return response.json(focus);
+    return res.send(focus);
   }
 
-  async deleteFocus(request: any, response: any) {
+  async deleteFocus(
+    req: FastifyRequest<{ Params: { id: string } }>,
+    res: FastifyReply
+  ) {
     const db = await getDb();
 
     const focus = await db
       .collection("focus")
-      .findOne({ _id: new ObjectId(request.params.id as string) });
+      .findOne({ _id: new ObjectId(req.params.id) });
 
     if (!focus) {
       throw new AppError("Esse foco não existe");
     }
 
     if (focus.filename) {
-      const diskStorage = new DiskStorage();
-      await diskStorage.deleteFile(focus.filename);
+      //todo delete
+      // await deleteFile(req.body = {});
     }
 
     await db
       .collection("focus")
-      .deleteOne({ _id: new ObjectId(request.params.id as string) });
+      .deleteOne({ _id: new ObjectId(req.params.id) });
 
-    return response.json();
+    return res.send();
   }
 
-  async getFocus(request: any, response: any) {
+  async getFocus(
+    req: FastifyRequest<{ Params: { id: string } }>,
+    res: FastifyReply
+  ) {
     const db = await getDb();
 
     const focus = await db
       .collection("focus")
-      .findOne({ _id: new ObjectId(request.params.id as string) });
+      .findOne({ _id: new ObjectId(req.params.id) });
 
     if (!focus) {
       throw new AppError("Erro ao obter o foco");
@@ -89,31 +95,42 @@ export class FocusController {
           }
         : undefined,
     };
-    return response.json(data);
+    return res.send(data);
   }
 
-  async update(request: any, response: any) {
-    const newData = request.body;
-    const user_id: string = request.user._id;
+  async create(
+    req: FastifyRequest<{
+      Body: {
+        filename: string;
+        coords: { latitude: number; longitude: number };
+        descricao: string;
+      };
+    }>,
+    res: FastifyReply
+  ) {
+    const user_id = req.headers.user as string;
 
     const db = await getDb();
 
     await db
       .collection("focus")
-      .updateOne(
-        { filename: request.body.filename },
-        { $set: { ...newData, user_id } }
-      );
+      .insertOne({ ...req.body, user_id, ...getDateInfo() });
 
     await db
       .collection("users")
       .updateOne({ _id: new ObjectId(user_id) }, { $inc: { pontos: 1 } });
 
-    return response.status(201).json();
+    return res.status(201).send();
   }
 
-  async markAsFinished(request: any, response: any) {
-    const user_id: string = request.user._id;
+  async markAsFinished(
+    req: FastifyRequest<{
+      Params: { id: string };
+      Body: { resolutionPhoto: string };
+    }>,
+    res: FastifyReply
+  ) {
+    const user_id = req.headers.user as string;
     try {
       const db = await getDb();
 
@@ -122,20 +139,20 @@ export class FocusController {
         .updateOne({ _id: new ObjectId(user_id) }, { $inc: { pontos: 2 } });
 
       await db.collection("focus").updateOne(
-        { _id: new ObjectId(request.params.id as string) },
+        { _id: new ObjectId(req.params.id as string) },
         {
           $set: {
             concluido: true,
             userWhoFinished: user_id,
-            resolutionPhoto: request.body.resolutionPhoto,
+            resolutionPhoto: req.body.resolutionPhoto,
             ...getDateInfo(true),
           },
         }
       );
 
-      return response.status(201).json();
+      return res.status(201).send();
     } catch (error) {
-      return response.status(400).json({
+      return res.status(400).send({
         status: "error",
         message: "Erro ao marcar como concluído",
       });

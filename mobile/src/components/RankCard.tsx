@@ -1,16 +1,16 @@
 import defaultUserPhotoImg from "@assets/userPhotoDefault.png";
 import { RankDTO } from "@dtos/RankDTO";
 import { useAuth } from "@hooks/useAuth";
-import { api } from "@services/api";
 import { HStack, Image, Text, VStack } from "native-base";
 
 type Props = {
   data: RankDTO;
   position: number;
   mb?: number;
+  firstPosition: boolean
 };
 
-export function RankCard({ data, position, mb = 3 }: Props) {
+export function RankCard({ data, position, mb = 3, firstPosition }: Props) {
   const { user } = useAuth();
 
   return (
@@ -19,9 +19,9 @@ export function RankCard({ data, position, mb = 3 }: Props) {
       px={5}
       py={4}
       mb={mb}
-      bg={"gray.600"}
-      borderColor={"green.500"}
-      borderWidth={user._id === data._id ? 1 : 0}
+      bg={user._id === data._id ? 'gray.400' : "gray.600"}
+      borderColor={user._id === data._id ? "green.500" : firstPosition ? 'yellow.500' : 'gray.400'}
+      borderWidth={user._id === data._id ? 2 : 1}
       rounded="md"
       alignItems="center"
       justifyContent="space-between"
@@ -31,7 +31,7 @@ export function RankCard({ data, position, mb = 3 }: Props) {
         position="absolute"
         top={0}
         left={1}
-        color="gray.300"
+        color={'gray.300'}
         fontSize="sm"
         fontFamily="heading"
         p={0}
@@ -41,7 +41,7 @@ export function RankCard({ data, position, mb = 3 }: Props) {
       <Image
         source={
           data.avatar
-            ? { uri: `${api.defaults.baseURL}/avatar/${data.avatar}` }
+            ? { uri: data.avatar }
             : defaultUserPhotoImg
         }
         defaultSource={defaultUserPhotoImg}
@@ -55,21 +55,18 @@ export function RankCard({ data, position, mb = 3 }: Props) {
       <VStack ml={4} flex={1}>
         <Text
           fontFamily="heading"
-          color="gray.200"
+          color={user._id === data._id ? 'gray.100' : "gray.200"}
           fontSize="md"
           numberOfLines={1}
         >
           {data.name}
         </Text>
-        <Text color="gray.300" fontSize="sm" numberOfLines={1}>
-          {data.cidade} - {data.uf}
-        </Text>
       </VStack>
       <Text
         fontFamily="heading"
-        color="white"
         fontSize="lg"
         textTransform="capitalize"
+        color={'gray.100'}
       >
         {data.pontos}
       </Text>

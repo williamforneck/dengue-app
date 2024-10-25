@@ -1,12 +1,16 @@
 import { compare } from "bcryptjs";
+import { FastifyReply, FastifyRequest } from "fastify";
 import { getDb } from "../configs/db";
 import { GenerateRefreshToken } from "../providers/GenerateRefreshToken";
 import { GenerateToken } from "../providers/GenerateToken";
 import { AppError } from "../utils/AppError";
 
 export class SessionsController {
-  async create(request: any, response: any) {
-    const { email, password } = request.body;
+  async create(
+    req: FastifyRequest<{ Body: { email: string; password: string } }>,
+    res: FastifyReply
+  ) {
+    const { email, password } = req.body;
 
     const db = await getDb();
 
@@ -32,6 +36,6 @@ export class SessionsController {
 
     delete user.password;
 
-    response.status(201).json({ user, token, refresh_token });
+    res.status(201).send({ user, token, refresh_token });
   }
 }

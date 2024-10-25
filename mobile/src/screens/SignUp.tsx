@@ -65,6 +65,7 @@ export function SignUp() {
   const handleSignUp = async (data: FormDataProps) => {
     try {
       setIsLoadingCreateUser(true);
+
       await api.post("/users", data);
       await signIn(data.email, data.password);
     } catch (error) {

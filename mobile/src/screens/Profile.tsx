@@ -66,7 +66,7 @@ export function Profile() {
 
   const toast = useToast();
 
-  const { user, updateUserProfile } = useAuth();
+  const { user, updateUserProfile, signOut } = useAuth();
 
   const {
     control,
@@ -145,18 +145,20 @@ export function Profile() {
 
         const userPhotoUploadForm = new FormData();
 
-        userPhotoUploadForm.append("avatar", photoFile);
+        userPhotoUploadForm.append("file", photoFile);
 
-        const response = await api.patch("/users/avatar", userPhotoUploadForm, {
+        const { data } = await api.post<{ filename: string }>("/upload", userPhotoUploadForm, {
           headers: {
             "Content-Type": "multipart/form-data",
           },
         });
 
         const updatedUser = user;
-        updatedUser.avatar = response.data.avatar;
+        updatedUser.avatar = data.filename;
 
         await updateUserProfile(updatedUser);
+
+        await api.patch("/users", { filename: data.filename })
 
         toast.show({
           title: "Foto atualizada!",
@@ -202,7 +204,7 @@ export function Profile() {
               <UserPhoto
                 source={
                   user.avatar
-                    ? { uri: `${api.defaults.baseURL}/avatar/${user.avatar}` }
+                    ? { uri: user.avatar }
                     : defaultUserPhotoImg
                 }
                 alt="Foto do usuário"
@@ -302,6 +304,7 @@ export function Profile() {
               onPress={handleSubmit(handleProfileUpdate)}
               isLoading={isLoading}
             />
+            <Button onPress={signOut} mt={8} type="error" variant={'outline'} title="Sair do app" />
           </Center>
         </ScrollView>
       </KeyboardAwareScrollView>

@@ -19,6 +19,7 @@ export function Rank() {
       setIsLoading(true);
       const { data } = await api.get("/rank");
       setRanks(data);
+      console.log(data)
     } catch (error) {
       const isAppError = error instanceof AppError;
       const title = isAppError
@@ -55,6 +56,7 @@ export function Rank() {
               data={item}
               position={index + 1}
               mb={index === ranks.length - 1 ? 6 : 3}
+              firstPosition={item._id === ranks[0]._id}
             />
           )}
           ListEmptyComponent={

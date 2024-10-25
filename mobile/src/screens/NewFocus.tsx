@@ -87,6 +87,7 @@ export function NewFocus() {
       }
 
       if (photoSelected.assets[0].uri) {
+        console.log("todo: deletar foto atual da base")
         const photoInfo = await FileSystem.getInfoAsync(
           photoSelected.assets[0].uri
         );
@@ -107,14 +108,14 @@ export function NewFocus() {
 
         const userPhotoUploadForm = new FormData();
 
-        userPhotoUploadForm.append("imagem", photoFile);
+        userPhotoUploadForm.append("file", photoFile);
 
-        const response = await api.post("/uploads", userPhotoUploadForm, {
+        const { data } = await api.post<{ filename: string }>("/upload", userPhotoUploadForm, {
           headers: {
             "Content-Type": "multipart/form-data",
           },
         });
-        setPhoto(response.data.filename);
+        setPhoto(data.filename);
       }
     } catch (error) {
       const isAppError = error instanceof AppError;
@@ -159,7 +160,7 @@ export function NewFocus() {
     };
 
     try {
-      await api.put("/focus", data);
+      await api.post("/focus", data);
       toast.show({
         title: "Foco cadastrado com sucesso! Você ganhou 1 ponto!",
         bgColor: "green.500",
@@ -244,7 +245,7 @@ export function NewFocus() {
                             w={'full'}
                             h={PHOTO_SIZE}
                             rounded={'2xl'}
-                            source={{ uri: `${api.defaults.baseURL}/avatar/${photo}` }}
+                            source={{ uri: photo }}
                             alt="Foto do local"
                           />
                         ) : (<ImageSvg width={160} height={160} onPress={handleUserPhotoSelect} stroke={theme.colors.gray[100]} />)}
