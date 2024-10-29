@@ -1,5 +1,5 @@
 {
-  "name": "dengue-api",
+  "name": "dengue-zero-api",
   "version": "1.0.0",
   "description": "API desenvolvida para ser utilizada no app desenvolvido na matéria de projeto inovações tecnologicas.",
   "main": "index.js",

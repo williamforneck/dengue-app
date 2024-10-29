@@ -2,13 +2,13 @@ import cors from "@fastify/cors";
 import multipart from "@fastify/multipart";
 import Fastify, { FastifyInstance } from "fastify";
 import { getMongoClient } from "./configs/db";
+import { uploadFile } from "./controllers/FilesController.ts";
 import { FocusController } from "./controllers/FocusController";
 import { RankController } from "./controllers/RankController";
 import { SessionsController } from "./controllers/SessionsController";
 import { UserRefreshToken } from "./controllers/UserRefreshToken";
 import { UsersController } from "./controllers/UsersController";
 import { AuthMiddleware } from "./middlewares/middleware";
-import { uploadFile } from "./providers/files";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 require("dotenv").config();
