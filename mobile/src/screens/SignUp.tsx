@@ -13,7 +13,7 @@ import {
 import { Controller, useForm } from "react-hook-form";
 
 import BackgroundImage from "@assets/background1.png";
-import LogoSvg from "@assets/logo.svg";
+import LogoSvg from "@assets/logo_2.svg";
 import { Button } from "@components/Button";
 import { Input } from "@components/Input";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -105,17 +105,9 @@ export function SignUp() {
               right: 0,
             }}
           />
-          <Center my={24} mb={4}>
+          <Center my={24} mt={12} mb={4}>
             <HStack alignItems={"center"}>
-              <LogoSvg width={40} color={"#00875F"} />
-              <Heading
-                ml={4}
-                color="gray.100"
-                fontSize={24}
-                fontFamily="heading"
-              >
-                Caça Dengue
-              </Heading>
+              <LogoSvg width={160} height={160} color={"#00875F"} />
             </HStack>
             <Text color="gray.100" fontSize="sm">
               Unidos contra a dengue

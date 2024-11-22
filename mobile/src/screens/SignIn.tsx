@@ -10,17 +10,17 @@ import {
 } from "native-base";
 import { Controller, useForm } from "react-hook-form";
 
-import { AppError } from "@utils/AppError";
-import { AuthNavigatorRoutesProps } from "@routes/auth.routes";
 import BackgroundImage from "@assets/background1.png";
+import LogoSvg from "@assets/logo_2.svg";
 import { Button } from "@components/Button";
 import { Input } from "@components/Input";
-import LogoSvg from "@assets/logo.svg";
 import { useAuth } from "@hooks/useAuth";
 import { useNavigation } from "@react-navigation/native";
+import { AuthNavigatorRoutesProps } from "@routes/auth.routes";
+import { AppError } from "@utils/AppError";
 import { useState } from "react";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { Platform } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 type FormData = {
   email: string;
@@ -82,12 +82,9 @@ export function SignIn() {
             right: 0,
           }}
         />
-        <Center my={24} mb={4}>
+        <Center my={24} mt={12} mb={4}>
           <HStack alignItems={"center"}>
-            <LogoSvg width={40} color={"#00875F"} />
-            <Heading ml={4} color="gray.100" fontSize={24} fontFamily="heading">
-              Caça Dengue
-            </Heading>
+            <LogoSvg width={200} height={200} color={"#00875F"} />
           </HStack>
           <Text color="gray.100" fontSize="sm">
             Unidos contra a dengue
@@ -99,7 +96,7 @@ export function SignIn() {
           extraHeight={Platform.select({})}
         >
           <Center px={10}>
-            <Heading color="gray.100" fontSize="xl" fontFamily="heading" mb={6}>
+            <Heading color="gray.100" fontSize="xl" fontFamily="heading" mb={2}>
               Acesse sua conta
             </Heading>
             <Controller
@@ -137,7 +134,7 @@ export function SignIn() {
               isLoading={loading}
             />
           </Center>
-          <Center px={10} mt={24}>
+          <Center px={10} mt={12}>
             <Text color="gray.100" fontSize="sm" mb={3} fontFamily="body">
               Ainda não tem acesso?
             </Text>
